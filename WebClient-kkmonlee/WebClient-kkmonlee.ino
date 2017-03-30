@@ -20,6 +20,12 @@ void setup() {
   // postData();
 }
 
+void closeClient() {
+  if (client.available()) {
+    
+  }
+}
+
 void loop() {
   value = analogRead(LDR);
   postData();
@@ -114,5 +120,8 @@ void postData() {
     client.stop();
     delay(1000);
   }
-  client.flush();
+
+  while (client.available()) {
+    client.stop();
+  }
 }
