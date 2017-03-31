@@ -1,42 +1,60 @@
-#include <SPI.h>
 #include <WiFi.h>
+
+// WiFiClient instance
 WiFiClient client;
+
+// 2 LDRs on A0 and A1
 int LDR1 = A0;
 int LDR2 = A1;
+
+// WiFi details (subject to change)
 char ssid[] = "OnePlus3";
 char password[] = "82718271";
 int status = WL_IDLE_STATUS;
 
-
+// Primary server address (domain only)
 char server[] = "www.kkmonlee.com";
+
+// analogRead of LDR1 and LDR2
 int value1, value2;
 
 void setup() {
+  // Start at baud 9600
   Serial.begin(9600);
   pinMode(LDR1, INPUT);
   pinMode(LDR2, INPUT);
+  // Connect to WiFi
   connectWifi();
+  // Print WiFi status (verbose)
   printWifiStatus();
   // postData();
 }
 
 void loop() {
+  // value1 and value2 subject to being volatile type
   value1 = analogRead(LDR1);
   value2 = analogRead(LDR2);
+
+  // HTTP GET to execute PHP script on web server
   postData();
 
-  delay(10000);
+  // Do this every 5 seconds
+  delay(5000);
 }
 
+// Connects to WiFi access point
 void connectWifi() {
+  // Keep looping until connected
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to ");
     Serial.println(ssid);
     status = WiFi.begin(ssid, password);
+    // Try every 0.5 seconds so as to not get rejected by the access point
     delay(500);
   }
 }
 
+// Prints WiFi connection details in verbose
 void printWifiStatus() {
   // Print the SSID of the network you're attached to
   Serial.print("SSID: ");
@@ -54,6 +72,7 @@ void printWifiStatus() {
   Serial.println(" dBm");
 }
 
+// Executes GET request to PHP
 void postData() {
   if (!client.connected()) {
     client.flush();
@@ -154,6 +173,9 @@ void postData() {
     delay(1000);
   }
 
+  // Important to stop client after every loop since only 9 
+  // instances can be connected 
+  // Otherwise "No Socket available" is printed
   while (client.available()) {
     client.stop();
   }
